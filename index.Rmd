@@ -15,8 +15,10 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "#>", out.widt
 ```
 
 This is the supplementary notes and examples for lecture 16.
-It is based on data and exampels seen in class 
-Build on the excellent tutorial from [RStudio](https://rstudio.github.io/leaflet/)
+
+It is based on data and examples seen in class 
+
+Built on the excellent tutorial from [RStudio](https://rstudio.github.io/leaflet/)
 
 ****
 
