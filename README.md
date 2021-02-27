@@ -3,6 +3,7 @@
  - Basic Leaflet and Interactive Mapping Lecture
  - This document contains the examples with limited commentary
  - This version will be used for the ecodatascience workshop
+ - Working with Marcela
  
  Link: https://mikejohnson51.github.io/lecture-16/
 
