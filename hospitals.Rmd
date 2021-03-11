@@ -1,0 +1,116 @@
+---
+title: "Hospitals"
+author: "Marcela"
+date: "2/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE)
+```
+
+```{r load_libraries}
+library(dplyr)
+library(leaflet)
+library(sf)
+library(htmlwidgets)
+library(rgdal)
+```
+
+```{r read_data}
+hospitals_bogota <- readRDS(file = "hospitals_bogota.rds")
+```
+
+```{r data_wrangling}
+hospitals_bogota <- hospitals_bogota %>% 
+  select(-c(CITY, pais, SurgRms, IntensRms, EmergRms, CTRYISOA3, ADM1ISOC, ADM1ISON, SubRegion, PRIORITY, Map)) %>% 
+  mutate(lat = as.numeric(Latitude), long = as.numeric(Longitude)) %>% 
+  select(-c(Latitude, Longitude)) %>% 
+  st_as_sf(coords = c("long", "lat"), crs = 4326)
+```
+
+```{r mapping_hospitals}
+icons = awesomeIcons(icon = 'h-square', markerColor = "red", library = 'fa', spin = FALSE)
+
+# Create a palette that maps factor levels to colors
+pal <- colorFactor(c("#d8b365", "#5ab4ac"), 
+                   domain = c("Public - Ministry of Health ", "Private"))
+
+
+addLegendCustom <- function(map, colors, labels, sizes, opacity = 0.8, stroke, title = "Hospital Level"){
+  colorAdditions <- paste0(colors, "; border-radius: 50%; width:", sizes, "px; height:", sizes, "px")
+  labelAdditions <- paste0("<div style='display: inline-block;height: ", 
+                           sizes, "px;margin-top: 4px;line-height: ", sizes, "px;'>", 
+                           labels, "</div>")
+
+  return(addLegend(map, colors = colorAdditions, 
+                   labels = labelAdditions, opacity = opacity, title = title))
+}
+
+map <- leaflet(data = hospitals_bogota) %>% 
+  addProviderTiles(providers$CartoDB.DarkMatter) %>% 
+  addCircleMarkers(radius = ~ifelse(H_Level == "SMALL - General surgery and open 24 hrs", 4, 
+                                    ifelse(H_Level == "MEDIUM -Two Specialty services", 8, 15)), 
+                   color = ~pal(H_Sector), 
+                   fillOpacity = .5, 
+                   stroke = FALSE, 
+                   label = ~Hospital_name,
+                   popup = paste0("Surgery Rooms:", hospitals_bogota$SurgeryRm)) %>%
+  addLegendCustom(colors = c("gray", "gray", "gray"), 
+                  labels = c("Small - General surgery and open 24 hrs", 
+                             "Medium -Two Specialty services", 
+                             "Big - High medical specialties"), 
+                  sizes = c(8, 15, 25), # circles size in legend look diferent so I had to exxagerage (increase) values
+                  stroke = FALSE) %>% 
+  addLegend(pal = pal, values = ~H_Sector, title = "Hospital Sector")
+saveWidget(map, file="Map_Hospitals_Bogota.html")
+map
+
+#  addAwesomeMarkers(icon = icons, label = ~Hospital_name)
+#  addMarkers(, label = ~Hospital_name)
+```
+
+```{r function_izing}
+hospital_map = function(hospital_level){
+leaflet(data = hospitals_bogota) %>% 
+  addProviderTiles(providers$CartoDB.DarkMatter) %>% 
+  addCircleMarkers(radius = ~ifelse(hospital_level == "SMALL - General surgery and open 24 hrs", 4, 
+                                    ifelse(hospital_level == "MEDIUM -Two Specialty services", 8, 15)), 
+                   color = ~pal(H_Sector), 
+                   fillOpacity = .5, 
+                   stroke = FALSE, 
+                   label = ~Hospital_name,
+                   popup = paste0("Surgery Rooms:", hospitals_bogota$SurgeryRm)) %>%
+  addLegendCustom(colors = c("gray", "gray", "gray"), 
+                  labels = c("Small - General surgery and open 24 hrs", 
+                             "Medium -Two Specialty services", 
+                             "Big - High medical specialties"), 
+                  sizes = c(8, 15, 25), # circles size in legend look diferent so I had to exxagerage (increase) values
+                  stroke = FALSE) %>% 
+  addLegend(pal = pal, values = ~H_Sector, title = "Hospital Sector")
+}
+```
+
+
+```{r mapping_hazard}
+seismic_hazard <- st_read("respuesta_sismica/Respuesta_Sismica.shp")
+#st_crs(resp_sismica)
+seismic_hazard <- seismic_hazard  %>%
+  st_transform(4326) # From EPSG:3857 (a Spherical Mercator projection coordinate system) to WGS84
+```
+
+```{r mapping_hazard}
+pal <- colorFactor(
+  palette = 'Dark2',
+  domain = seismic_hazard $RESSIS
+)
+
+map2 <- leaflet() %>% 
+  addProviderTiles(providers$CartoDB) %>% 
+  addPolygons(data = seismic_hazard , 
+              stroke = FALSE, 
+              fillColor = ~pal(RESSIS),
+              label = ~RESSIS)
+saveWidget(map2, file="Mapa_respuesta_sismica.html")
+```
+
