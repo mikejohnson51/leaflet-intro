@@ -80,3 +80,24 @@ hospital_map = function(hospital_level){
 }
 
 ```
+
+```{r read_hazard_info}
+seismic_hazard <- read_sf("https://datosabiertos.bogota.gov.co/dataset/b3d097e8-0d97-44f5-90d7-e7d73530c33f/resource/62cc3e17-a69a-45de-a1cb-4ade5867c1ed/download/respuesta-sismica.geojson") %>%
+  st_transform(4326) # From EPSG:3857 (a Spherical Mercator projection coordinate system) to WGS84
+```
+
+```{r mapping_hazard}
+pal <- colorFactor(
+  palette = 'Dark2', #need a different palette to show 16 classes
+  domain = seismic_hazard $RESSIS 
+)
+
+hazard_map <- leaflet() %>% 
+  addProviderTiles(providers$CartoDB) %>% 
+  addPolygons(data = seismic_hazard , 
+              stroke = FALSE, 
+              fillColor = ~pal(RESSIS),
+              label = ~RESSIS)
+saveWidget(map2, file="Mapa_respuesta_sismica.html")
+hazard_map 
+```
