@@ -1,0 +1,138 @@
+---
+title: "USA Water Explorer"
+runtime: shiny
+output: 
+  flexdashboard::flex_dashboard:
+    navbar:
+      - { icon: "fa-question-circle", href: "https://github.com/mikejohnson51/leaflet-intro", align: right }
+    theme: cerulean
+    orientation: column
+    vertical_layout: fill
+    logo: www/logo-48-48.png
+    favicon: www/favicon.ico
+---
+
+```{=html}
+<script>
+$('.navbar-logo').wrap('<a href="https://eco-data-science.github.io/" target=_blank>');
+</script>
+```
+
+```{r setup, include=FALSE}
+source("helpers.R")
+```
+
+# Streamflow {data-icon="fa-filter"}
+
+## Inputs {.sidebar}
+
+### Search
+
+```{r}
+dqshiny::autocomplete_input("auto", 
+                   "Search for a County:", 
+                    value = "",
+                    max_options = 10,
+                    structure(unique_sites$geoid, names = unique_sites$name))
+```
+
+## Row
+
+### Map
+
+```{r}
+leafletOutput("usgs")
+```
+
+## Row
+
+### Timeseries
+
+```{r}
+dygraphOutput('graph')
+```
+
+```{r, context='server'}
+output$usgs = renderLeaflet({ 
+  basemap() %>% 
+    addGlPoints(data = sites,
+                popup = popupTable(st_drop_geometry(sites)),
+                layerId = sites$siteID,
+                group = "gs")
+  })
+
+observeEvent(input$usgs_glify_click, {
+  
+  flows = get_streamflow(input$usgs_glify_click$id)
+  rownames(flows) = flows$Date
+  output$graph =  renderDygraph({
+    dygraph(data = select(flows, Flow),
+          main = paste0("Streamflow: ", flows$site_no[1]),
+          ylab = 'Flow (cfs)',
+          xlab = 'DateTime')
+  })
+})
+
+
+observeEvent(input$auto, { 
+    if(input$auto == ""){ 
+      NULL 
+    } else {
+      leafletProxy("usgs") %>% 
+        zoom_to_county(counties, input$auto)
+    }
+})
+```
+
+
+# My Watershed {data-icon="fa-tint"}
+
+## Inputs {.sidebar}
+
+### Search
+
+```{r}
+textInput("geo", label = "Geocode", value = "")
+actionButton("goButton", "Go!")
+```
+
+## Row
+
+### Map
+
+```{r}
+leafletOutput('nldi')
+```
+
+```{r, context="server"}
+output$nldi <- renderLeaflet({ basemap() })
+
+observeEvent(input$nldi_click, {
+  
+  tmp = find_nldi(x = input$nldi_click$lng, y = input$nldi_click$lat)
+
+  leafletProxy("nldi") %>% 
+    clearGroup("A") %>% 
+    addPolygons(data = tmp$basin, 
+                fillColor = "transparent", 
+                color = "black",
+                group = "A") %>% 
+    addPolylines(data = tmp$UM_flowlines, 
+                 color = 'blue',
+                 group = "A") %>% 
+    addMarkers(lng = input$nldi_click$lng,
+               lat = input$nldi_click$lat,
+               group = "A")
+})
+
+observeEvent(input$goButton, {
+  pt = AOI::geocode(input$geo)
+  
+  if(!is.na(pt$lat)){
+    leafletProxy("nldi") %>% 
+      flyTo(lat = pt$lat, lng = pt$lon, zoom = 14)
+  }
+  
+})
+```
+
