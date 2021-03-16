@@ -124,12 +124,11 @@ observeEvent(input$nldi_click, {
 
 observeEvent(input$goButton, {
   pt = geocode(input$geo)
-  
+
   if(!is.na(pt$lat)){
     leafletProxy("nldi") %>% 
       flyTo(lat = pt$lat, lng = pt$lon, zoom = 14)
   }
-  
 })
 ```
 
