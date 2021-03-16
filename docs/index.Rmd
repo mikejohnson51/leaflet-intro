@@ -14,7 +14,7 @@ output:
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "#>", out.width = "100%")
 ```
 
-This is the supplementary notes and examples for lecture 16.
+This is the supplementary notes and examples for an introduction to leaflet.
 
 It is based on data and examples seen in class 
 
@@ -22,7 +22,7 @@ Built on the excellent tutorial from [RStudio](https://rstudio.github.io/leaflet
 
 ****
 
-If not already installed, the install `leaflet`:
+If not already installed, install `leaflet`:
 ```{r, eval = FALSE}
 install.packages("leaflet")
 ```
@@ -43,12 +43,11 @@ library(USAboundaries)
 ---
 
 # Basic Usage
-Creating a Leaflet map requires a few basic steps (not unsimular to ggplot):
+Creating a Leaflet map requires a few basic steps (not dissimilar to ggplot):
 
   1. Initialize a map widget by calling leaflet().
   
   2. Add layers (i.e., features) to the map by using layer functions (e.g. addTiles, addMarkers, addPolygons,...)
-  
   
   3. Print the map widget to display it.
 
@@ -102,7 +101,7 @@ names(providers) %>%
 
 > Note that some tile set providers require you to register. You can pass access tokens/keys, and other options, to the tile provider by populating the options argument with the providerTileOptions() function.
 
-- I would personal stick with the OSM, CartoDB, ESRI, and Stamen servers ...
+- I would personal stick with the OSM, CartoDB, ESRI, and Stamen servers ... [see more here] (https://leaflet-extras.github.io/leaflet-providers/preview/)
 
 Below are a few examples:
 
