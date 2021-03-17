@@ -1,7 +1,7 @@
 ---
 title: "Geography 176A"
 subtitle: "Leaflet R"
-author: "Mike Johnson"
+author: "Mike Johnson & Marcela Suarez"
 output:
   html_document:
     toc: true
