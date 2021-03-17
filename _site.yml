@@ -6,8 +6,8 @@ navbar:
       icon: fas fa-book
       menu:
       -  text: 1. Basic Intro
-         href: index.Rmd
-      -  text: 2. Hosptial Example
+         href: index.html
+      -  text: 2. Hospital Example
          href: hospitals.html
       -  text: 3. Shiny (USA Water)
          href: shiny-starter.html

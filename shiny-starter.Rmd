@@ -1,6 +1,6 @@
 ---
-title: "USA Water"
-subtitle: "Shiny/R/Leaflet"
+title:  "Shiny/Leaflet"
+subtitle: "Building a USA water dashboard"
 output:
   html_document:
     toc: true
@@ -11,11 +11,6 @@ output:
 ```{r,echo=FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "#>", out.width = "100%")
 ```
-
-## ADD GIF!!
-
-
-
 
 # Libraries
 
@@ -38,6 +33,7 @@ counties = aoi_get(state = 'conus', county = "all") %>%
   mutate(location = paste(name, state_abbr, sep = ", ")) %>% 
   select(geoid, name, state_name, location)
 
+glimpse(counties)
 plot(counties$geometry)
 ```
 
@@ -132,4 +128,14 @@ basemap() %>%
 
 # Where are we going?
 
-[Shiny Repo](https://github.com/mikejohnson51/leaflet-intro/tree/master/shiny)
+We will use [flexdashboard](https://rmarkdown.rstudio.com/flexdashboard/) to generate the app. 
+
+If you know Rmarkdown basics, this will be intuitive for you!
+
+The key new piece is that:
+
+ - Each Level 1 Header (#) begins a new page in the dashboard.
+ - Each Level 2 Header (##) begins a new column/row.
+ - Each Level 3 Header (###) begins a new box.
+
+The app material can be found [here](https://github.com/mikejohnson51/leaflet-intro/tree/master/shiny)

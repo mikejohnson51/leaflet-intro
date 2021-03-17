@@ -1,21 +1,4 @@
-library(flexdashboard) # Shiny setup
-library(shiny)         # Shiny
-library(dqshiny)       # Shiny add-on
-
-library(AOI)           # Data and geocoding
-library(dataRetrieval) # USGS data access
-
-library(sf)            # all things spatial ...
-library(dplyr)         # data manipulations ...
-
-library(leaflet)       # Interactive mapping
-library(leafgl)        # WebGL interface for larger data
-library(leafpop)       # nicer popups :)
-
-library(dygraphs)      # Interactive graphs
-
 # Needed Data
-
 ## `sf` object of USA counties
 counties        = AOI::aoi_get(state = 'conus', county = "all") %>%
   mutate(location = paste(name, state_abbr, sep = ", ")) %>%

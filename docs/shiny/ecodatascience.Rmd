@@ -19,6 +19,23 @@ $('.navbar-logo').wrap('<a href="https://eco-data-science.github.io/" target=_bl
 ```
 
 ```{r setup, include=FALSE}
+# Load libraries, libraries and data ---
+library(flexdashboard) # Shiny setup
+library(shiny)         # Shiny
+library(dqshiny)       # Shiny add-on
+
+library(AOI)           # Data and geocoding
+library(dataRetrieval) # USGS data access
+
+library(sf)            # all things spatial ...
+library(dplyr)         # data manipulations ...
+
+library(leaflet)       # Interactive mapping
+library(leafgl)        # WebGL interface for larger data
+library(leafpop)       # nicer popups :)
+
+library(dygraphs)      # Interactive graphs
+
 # Source your functions, libraries and data ---
 source("helpers.R")
 ```
@@ -60,9 +77,7 @@ dygraphOutput('graph')
 ## be sure to define layerID!!
 
 reg = substr(sites$siteID,1,2)
-cols = colorFactor( rainbow(length(unique(reg))),
-                    domain = reg)
- 
+cols = colorFactor( rainbow(length(unique(reg))), domain = reg)
 
 output$usgs = renderLeaflet({ 
   basemap() %>% 
@@ -76,7 +91,6 @@ output$usgs = renderLeaflet({
   })
 
 ## Observe clicks, on the GL layer of the USGS map 
-
 observeEvent(input$usgs_glify_click, {
   # Get USGS streamflow of the layerID of the clicked object
   flows <<- get_streamflow(input$usgs_glify_click$id)
@@ -84,7 +98,7 @@ observeEvent(input$usgs_glify_click, {
   # dygraphs uses the rowname to define date...
    rownames(flows) = flows$Date
    
-  # Graph and save to output object ..
+  # Graph and save to output object ...
   output$graph =  renderDygraph({
     dygraph(data = select(flows, Flow),
           main   = paste0("Streamflow: USGS-", input$usgs_glify_click$id),
@@ -97,8 +111,7 @@ observeEvent(input$auto, {
     if(input$auto == ""){ 
       NULL 
     } else {
-      leafletProxy("usgs") %>% 
-        zoom_to_county(counties, input$auto)
+       zoom_to_county(leafletProxy("usgs"), counties, input$auto)
     }
 })
 
