@@ -1,0 +1,17 @@
+navbar:
+  title: "Introduction to Leaflet"
+  type: default
+  left:
+    - text: "Articles"
+      icon: fas fa-book
+      menu:
+      -  text: 1. Basic Intro
+         href: index.Rmd
+      -  text: 2. Hosptial Example
+         href: hospitals.html
+      -  text: 3. Shiny (USA Water)
+         href: shiny-starter.html
+  right:
+    - icon: fa-github fa-lg
+      href: https://github.com/mikejohnson51/leaflet-intro
+output_dir: "docs"

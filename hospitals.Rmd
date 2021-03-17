@@ -2,7 +2,6 @@
 title: "Example - Intro to Leaflet"
 subtitle:  "Exploring Seismic Vulnerability of Hospitals in Bogota, Colombia  "
 author: "Marcela Suarez"
-
 output:
   html_document:
     toc: true
@@ -35,7 +34,7 @@ library(sf)
 Load point data
 
 ```{r read_data}
-hospitals_bogota <- readRDS(file = "../data/hospitals_bogota.rds")
+hospitals_bogota <- readRDS(file = "data/hospitals_bogota.rds")
 ```
 
 Data wrangling - point data

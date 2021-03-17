@@ -7,7 +7,6 @@ output:
     toc: true
     toc_float: true
     toc_collapsed: true
-    
 ---
 
 ```{r,echo=FALSE}
@@ -157,7 +156,7 @@ Markers are one way to identify point information on a map:
 #### Example Starbucks data:
 
 ```{r}
-(starbucks = read_csv('../data/directory.csv') %>% 
+(starbucks = read_csv('data/directory.csv') %>% 
   filter(City %in% c("Goleta", "Santa Barbara")) %>% 
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
   select(store_name = `Store Name`, phone = `Phone Number`, address = `Street Address`, city = City, brand = Brand))
@@ -240,7 +239,7 @@ leaflet(data = starbucks) %>%
 Sometimes while mapping many points, it is useful to cluster them. For example lets plot all starbucks in the world!
 
 ```{r}
-all_sb = read_csv('../data/directory.csv') %>% 
+all_sb = read_csv('data/directory.csv') %>% 
   filter(!is.na(Latitude)) %>% 
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) 
 
@@ -331,7 +330,7 @@ leaflet() %>%
 https://waterdata.usgs.gov/monitoring-location/11120000/
 
 ```{r, fig.align='center', fig.width = 5, echo = FALSE}
-knitr::include_graphics('../img/16-usgs-gage.png')
+knitr::include_graphics('img/16-usgs-gage.png')
 ```
 
 
@@ -342,7 +341,7 @@ https://labs.waterdata.usgs.gov/api/nldi/linked-data/nwissite/USGS-11120000/navi
 Trance the Upper Tributary (UT) of the USGS-11120000
 
 ```{r, fig.align='center', fig.width = 10, echo = FALSE}
-knitr::include_graphics('../img/16-geojson.png')
+knitr::include_graphics('img/16-geojson.png')
 ```
 
 

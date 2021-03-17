@@ -1,0 +1,135 @@
+---
+title: "USA Water"
+subtitle: "Shiny/R/Leaflet"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+---
+
+```{r,echo=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "#>", out.width = "100%")
+```
+
+## ADD GIF!!
+
+
+
+
+# Libraries
+
+```{r}
+library(AOI)           # Data and geocoding
+library(dataRetrieval) # USGS data access
+
+library(sf)            # all things spatial ...
+library(dplyr)         # data manipulations ...
+
+library(leaflet)       # mapping
+```
+
+# Data
+
+### County `sf` object 
+
+```{r}
+counties = aoi_get(state = 'conus', county = "all") %>%
+  mutate(location = paste(name, state_abbr, sep = ", ")) %>% 
+  select(geoid, name, state_name, location)
+
+plot(counties$geometry)
+```
+
+### Active USGS gages
+
+```{r}
+sites   = readRDS("shiny/usgs_sites.rds")
+glimpse(sites)
+```
+
+# Core Leaflet functions
+
+### Auto generate basemap
+
+```{r}
+basemap = function(){
+  leaflet() %>%
+    addProviderTiles('CartoDB.Positron') %>%
+    setView(lat = 39, lng = -95, zoom = 3)
+}
+```
+
+#### Example 
+
+```{r}
+basemap()
+```
+
+### Zoom to a county, given a GEOID
+
+```{r}
+zoom_to_county = function(map, counties, FIP){
+
+  shp    = filter(counties, geoid == FIP)
+  bounds = as.vector(st_bbox(shp))
+
+  clearGroup(map, 'shp') %>%
+    addPolygons(data = shp,
+                color      = "#003660",
+                fillColor  = "#FEBC11",
+                fillOpacity = .2,
+                group = "shp") %>%
+    flyToBounds(bounds[1], bounds[2], bounds[3], bounds[4])
+}
+```
+
+#### Example 
+
+```{r}
+zoom_to_county(basemap(), counties, 25017)
+```
+
+# USGS functions
+
+### Wrapper for finding streamflow given a siteID
+
+```{r}
+get_streamflow = function(siteID){
+  readNWISdv(siteNumbers = siteID,
+             parameterCd = '00060',
+             startDate   = Sys.Date() - 365) %>%
+    renameNWISColumns()
+}
+```
+
+#### Example 
+
+```{r}
+flow = get_streamflow('01098530')
+glimpse(flow)
+```
+
+### [Network Linked Data Index](https://usgs-r.github.io/dataRetrieval/articles/nldi.html) function given a lat/lon
+
+```{r}
+find_nldi  = function(x, y){
+  findNLDI(location = c(x,y), nav = c('UM'), 
+           find = c("basin", "flowlines"), distance = 1000)
+}
+```
+
+#### Example 
+
+```{r}
+nldi_out = find_nldi(-104.780837, 38.786796)
+
+basemap() %>% 
+  addPolygons(data = nldi_out$basin) %>% 
+  addPolygons(data = nldi_out$UM_flowlines) %>%
+  zoom_to_county(counties, '08041')
+```
+
+# Where are we going?
+
+[Shiny Repo](https://github.com/mikejohnson51/leaflet-intro/tree/master/shiny)
