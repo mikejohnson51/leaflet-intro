@@ -1,7 +1,7 @@
 ---
-title: "Geography 176A"
-subtitle: "Leaflet R"
-author: "Mike Johnson & Marcela Suarez"
+title: "Interactive Mapping in R"
+subtitle: "Leaflet"
+author: "Mike Johnson"
 output:
   html_document:
     toc: true
@@ -55,9 +55,9 @@ Creating a Leaflet map requires a few basic steps (not dissimilar to ggplot):
 Here’s a basic example:
 
 ```{r, fig.height= 4}
-leaflet() %>%
-  addTiles() %>%
-  addMarkers(lng=-119.8489, lat=34.4140, popup="UCSB")
+leaflet() |>
+  addTiles() |>
+  addMarkers(lng=-105.0848, lat=40.5729, popup="CSU")
 ```
 
 ---
@@ -81,8 +81,8 @@ leaflet() %>%
 The easiest way to add tiles is by calling `addTiles()` with no arguments; by default, OpenStreetMap tiles are used.
 
 ```{r}
-(leaflet() %>% 
-  setView(lng=-119.8489, lat=34.4140, zoom = 12) %>% 
+(leaflet() |> 
+  setView(lng=-105.0848, lat=40.5729, zoom = 12) |> 
   addTiles())
 ```
 
@@ -94,7 +94,7 @@ The easiest way to add tiles is by calling `addTiles()` with no arguments; by de
 
 ```{r}
 length(providers)
-names(providers) %>% 
+names(providers) |> 
   head()
 ```
 
@@ -107,30 +107,30 @@ Below are a few examples:
 
 ### CartoDB
 ```{r}
-leaflet() %>% 
-  setView(lng=-119.8489, lat=34.4140, zoom = 12) %>% 
+leaflet() |> 
+  setView(lng=-105.0848, lat=40.5729, zoom = 12) |> 
   addProviderTiles(providers$CartoDB)
 ```
 
 ### Stamen.Toner
 ```{r}
-leaflet() %>% 
-  setView(lng=-119.8489, lat=34.4140, zoom = 12) %>% 
+leaflet() |> 
+  setView(lng=-105.0848, lat=40.5729, zoom = 12) |> 
   addProviderTiles(providers$Stamen.Toner)
 ```
 
 ### ESRI Imagery
 
 ```{r}
-leaflet() %>% 
-  setView(lng=-119.8489, lat=34.4140, zoom = 12) %>% 
+leaflet() |> 
+  setView(lng=-105.0848, lat=40.5729, zoom = 12) |> 
   addProviderTiles(providers$Esri.WorldImagery)
 ```
 
 ### Stamen.TopOSMRelief
 ```{r}
-leaflet() %>% 
-  setView(lng=-119.8489, lat=34.4140, zoom = 12) %>% 
+leaflet() |> 
+  setView(lng=-105.0848, lat=40.5729, zoom = 12) |> 
   addProviderTiles(providers$Stamen.TopOSMRelief)
 ```
 
@@ -139,9 +139,9 @@ leaflet() %>%
 You can stack  multiple tile layers if the front tiles have some level of opacity. Here we layer the Stamen.TonerLines with aerial imagery
 
 ```{r}
-leaflet() %>% 
-  setView(lng=-119.8489, lat=34.4140, zoom = 12) %>% 
-  addProviderTiles(providers$Esri.WorldImagery) %>% 
+leaflet() |> 
+  setView(lng=-105.0848, lat=40.5729, zoom = 12) |> 
+  addProviderTiles(providers$Esri.WorldImagery) |> 
    addProviderTiles(providers$Stamen.TonerLines, options = providerTileOptions(opacity = .5)) 
 ```
 
@@ -156,9 +156,10 @@ Markers are one way to identify point information on a map:
 #### Example Starbucks data:
 
 ```{r}
-(starbucks = read_csv('data/directory.csv') %>% 
-  filter(City %in% c("Goleta", "Santa Barbara")) %>% 
-  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>% 
+(starbucks = read_csv('data/directory.csv') |> 
+  filter(City %in% c("Fort Collins", "Loveland"),
+         `State/Province` == "CO") |> 
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) |> 
   select(store_name = `Store Name`, phone = `Phone Number`, address = `Street Address`, city = City, brand = Brand))
 ```
 
@@ -174,8 +175,8 @@ As with most layer functions,
   - the `label` argument display a text label either on hover 
 
 ```{r}
-leaflet() %>% 
-  addProviderTiles(providers$CartoDB) %>% 
+leaflet() |> 
+  addProviderTiles(providers$CartoDB) |> 
   addMarkers(data = starbucks, popup = ~store_name, label = ~city)
 ```
 
@@ -192,7 +193,7 @@ We then use addAwesomeMarkers to spcifiy the icon we created using the icon argu
 ```{r}
 icons = awesomeIcons(icon = 'coffee', markerColor = "green", library = 'fa', spin = TRUE)
 
-leaflet(data = starbucks) %>% addProviderTiles(providers$CartoDB) %>% 
+leaflet(data = starbucks) |> addProviderTiles(providers$CartoDB) |> 
   addAwesomeMarkers(icon = icons, popup = ~store_name)
 ```
 
@@ -204,7 +205,7 @@ You can use HTML, CSS, and Java Script to modify your pop-ups
 For example, we can associate the name of the Starbucks locations with their google maps URL as an hyper reference (href):
 
 ```{r}
-starbucks = starbucks %>% 
+starbucks = starbucks |> 
   mutate(url = paste0('https://www.google.com/maps/place/',
                       gsub(" ", "+", address), "+",
                       gsub(" ", "+", city)))
@@ -216,8 +217,8 @@ head(pop)
 We can then add our custom popup to our icons:
 
 ```{r}
-leaflet(data = starbucks) %>%
-  addProviderTiles(providers$CartoDB) %>% 
+leaflet(data = starbucks) |>
+  addProviderTiles(providers$CartoDB) |> 
   addAwesomeMarkers(icon = icons, 
                     label = ~address, popup = pop)
 ```
@@ -228,23 +229,22 @@ leaflet(data = starbucks) %>%
 Circle markers are much like regular circles (shapes), except their radius in onscreen pixels stays constant _regardless_ of zoom level (z).
 
 ```{r}
-leaflet(data = starbucks) %>%
-  addProviderTiles(providers$CartoDB) %>% 
+leaflet(data = starbucks) |>
+  addProviderTiles(providers$CartoDB) |> 
   addCircleMarkers(label = ~address, popup = pop)
 ```
-
 
 #### Marker Clustering
 
 Sometimes while mapping many points, it is useful to cluster them. For example lets plot all starbucks in the world!
 
 ```{r}
-all_sb = read_csv('data/directory.csv') %>% 
-  filter(!is.na(Latitude)) %>% 
+all_co = read_csv('data/directory.csv') |> 
+  filter(!is.na(Latitude)) |> 
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) 
 
-leaflet(data = all_sb) %>% 
-  addProviderTiles(providers$CartoDB) %>% 
+leaflet(data = all_co) |> 
+  addProviderTiles(providers$CartoDB) |> 
   addMarkers(clusterOptions = markerClusterOptions())
 ```
 
@@ -277,7 +277,7 @@ The domain is the values - named by variable - that the color palette should ran
 # Create a palette that maps factor levels to colors
 pal <- colorFactor(c("darkgreen", "navy"), domain = c("Goleta", "Santa Barbara"))
 
-leaflet(data = starbucks) %>% addProviderTiles(providers$CartoDB) %>% 
+leaflet(data = starbucks) |> addProviderTiles(providers$CartoDB) |> 
   addCircleMarkers(color = ~pal(city), fillOpacity = .5, stroke = FALSE)
 
 ```
@@ -288,10 +288,10 @@ leaflet(data = starbucks) %>% addProviderTiles(providers$CartoDB) %>%
 
 #### Getting some data ...
 ```{r}
-(covid = readr::read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/live/us-states.csv') %>% 
-  filter(date == max(date)) %>% 
-  right_join(USAboundaries::us_states(), by = c("state" = "name")) %>% 
-  filter(!stusps %in% c("AK","PR", "HI")) %>% 
+(covid = readr::read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/live/us-states.csv') |> 
+  filter(date == max(date)) |> 
+  right_join(USAboundaries::us_states(), by = c("state" = "name")) |> 
+  filter(!stusps %in% c("AK","PR", "HI")) |> 
   st_as_sf())
 ```
 
@@ -300,10 +300,10 @@ leaflet(data = starbucks) %>% addProviderTiles(providers$CartoDB) %>%
 Adding those cases counts to polygons over a `YlOrRd` color ramp
 
 ```{r}
-leaflet() %>% 
-  addProviderTiles(providers$CartoDB) %>% 
+leaflet() |> 
+  addProviderTiles(providers$CartoDB) |> 
   addPolygons(data = covid, 
-              fillColor  = ~colorQuantile("YlOrRd", confirmed_cases)(confirmed_cases),
+              fillColor  = ~colorQuantile("YlOrRd", cases)(cases),
               color = NA,
               label = ~state_name)
 ```
@@ -312,16 +312,15 @@ leaflet() %>%
 ### Circles
 
 ```{r}
-leaflet() %>% 
-  addProviderTiles(providers$CartoDB.DarkMatter) %>% 
+leaflet() |> 
+  addProviderTiles(providers$CartoDB.DarkMatter) |> 
   addCircles(data = st_centroid(covid), 
              fillColor  = ~colorQuantile("YlOrRd", cases)(cases),
              color = NA,
              fillOpacity = .5,
-             radius = ~cases/3,
-             label = ~cases)
+             radius = ~cases/50,
+             label = ~state)
 ```
-
 
 # Web based data
 
@@ -348,16 +347,16 @@ knitr::include_graphics('img/16-geojson.png')
 ### Adding "Web data" to the map 
 
 ```{r}
-# site ID
-id = "11120000"
+# site ID for Cache LA Poudre River at Fort Collins, CO
+id = "06752260"
 
 # base URL
-base ="https://labs.waterdata.usgs.gov/api/nldi/linked-data/"
+(base = dataRetrieval:::pkg.env$nldi_base)
 
 # Reading sf for URLs in line
-leaflet() %>% 
-  addProviderTiles(providers$CartoDB) %>% 
-  addPolylines(data = read_sf(paste0(base,'nwissite/USGS-',id,'/navigate/UT'))) %>% 
+leaflet() |> 
+  addProviderTiles(providers$CartoDB) |> 
+  addPolylines(data = read_sf(paste0(base,'nwissite/USGS-',id,'/navigate/UT'))) |> 
   addPolygons(data =  read_sf(paste0(base,'nwissite/USGS-',id,'/basin')), 
               fillColor =  "transparent", color = "black")
 ```
@@ -368,14 +367,14 @@ leaflet() %>%
 WMS tiles can be added directly to a map. Here we use the NEXRAD rainfall information (refelctivity) from the Iowa Mesonet Program
 
 (You may need to scroll out to find an)
-```{r}
 
+```{r}
 conus = filter(us_states(), !stusps %in% c("AK", "PR", "HI"))
 
-leaflet() %>% 
-  addProviderTiles(providers$CartoDB) %>% 
+leaflet() |> 
+  addProviderTiles(providers$CartoDB) |> 
   addPolygons(data = st_union(conus), fillColor = "transparent",
-              color = "black", weight = 1) %>% 
+              color = "black", weight = 1) |> 
   addWMSTiles(
     "http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi",
     layers = "nexrad-n0r-900913",
@@ -391,13 +390,13 @@ Uses Leaflet's built-in layers control you can choose one of several base layers
 By defining groups, you have the ability to toogle layers, and overlays on/off.
 
 ```{r, out.height="50%", eval = F}
-leaflet() %>% 
-  addProviderTiles(providers$CartoDB, group = "Grayscale") %>% 
-  addProviderTiles(providers$Esri.WorldTerrain, group = "Terrain") %>% 
-  addPolylines(data = read_sf(paste0(base,'nwissite/USGS-',id,'/navigate/UT'))) %>% 
-  addPolygons(data =  read_sf(paste0(base,'nwissite/USGS-',id,'/basin')), fillColor =  "transparent", color = "black", group = "basin") %>% 
+leaflet() |> 
+  addProviderTiles(providers$CartoDB, group = "Grayscale") |> 
+  addProviderTiles(providers$Esri.WorldTerrain, group = "Terrain") |> 
+  addPolylines(data = read_sf(paste0(base,'nwissite/USGS-',id,'/navigate/UT'))) |> 
+  addPolygons(data =  read_sf(paste0(base,'nwissite/USGS-',id,'/basin')), fillColor =  "transparent", color = "black", group = "basin") |> 
   addWMSTiles("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", layers = "nexrad-n0r-900913",
-    options = WMSTileOptions(format = "image/png", transparent = TRUE)) %>% 
+    options = WMSTileOptions(format = "image/png", transparent = TRUE)) |> 
   addLayersControl(overlayGroups = c("basin"), baseGroups = c("Terrain", "Grayscale"))
 ```
 
@@ -408,11 +407,11 @@ You can wrap your mapping code in functions to allow reusability
 
 ```{r}
 watershed_map = function(gage_id){
-leaflet() %>% 
-  addProviderTiles(providers$CartoDB) %>% 
-  addPolylines(data = read_sf(paste0(base,'nwissite/USGS-',gage_id,'/navigate/UT'))) %>% 
+leaflet() |> 
+  addProviderTiles(providers$CartoDB) |> 
+  addPolylines(data = read_sf(paste0(base,'nwissite/USGS-',gage_id,'/navigate/UT'))) |> 
   addPolygons(data =  read_sf(paste0(base,'nwissite/USGS-',gage_id,'/basin')), 
-              fillColor =  "transparent", color = "black", group = "basin") %>% 
+              fillColor =  "transparent", color = "black", group = "basin") |> 
   addWMSTiles("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", layers = "nexrad-n0r-900913",
     options = WMSTileOptions(format = "image/png", transparent = TRUE))
 }
@@ -420,7 +419,7 @@ leaflet() %>%
 
 
 ```{r}
-watershed_map("07382000")
+watershed_map("06752260")
 ```
 
 
@@ -429,9 +428,9 @@ watershed_map("07382000")
 - Measures, graticules, and inset maps
 
 ```{r}
-watershed_map("07382000") %>% 
-  addMeasure() %>% 
-  addGraticule() %>% 
+watershed_map("06752260") |> 
+  addMeasure() |> 
+  addGraticule() |> 
   addMiniMap()
 ```
 
@@ -442,10 +441,10 @@ watershed_map("07382000") %>%
 - Support for raster and stars objects (to come)
 
 ```{r}
-watershed_map("07382000") %>% 
-  addMeasure() %>% 
-  addGraticule() %>% 
-  leafem::addHomeButton(group = "basin") %>% 
+watershed_map("06752260") |> 
+  addMeasure() |> 
+  addGraticule() |> 
+  leafem::addHomeButton(group = "basin") |> 
   leafem::addMouseCoordinates() 
 ```
 
@@ -455,8 +454,8 @@ watershed_map("07382000") %>%
 - Popup Tables
 
 ```{r}
-leaflet(data = starbucks) %>% 
-  addProviderTiles(providers$CartoDB) %>% 
+leaflet(data = starbucks) |> 
+  addProviderTiles(providers$CartoDB) |> 
   addCircleMarkers(
     color = ~pal(city), 
     fillOpacity = .5,
@@ -468,7 +467,7 @@ leaflet(data = starbucks) %>%
 Making that table nicer...
 
 ```{r}
-leaflet(data = starbucks) %>% addProviderTiles(providers$CartoDB) %>% 
+leaflet(data = starbucks) |> addProviderTiles(providers$CartoDB) |> 
   addCircleMarkers(
     color = ~pal(city), fillOpacity = .5,
     stroke = FALSE, 
